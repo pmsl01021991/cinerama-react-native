@@ -4,6 +4,9 @@
     "slug": "cinerama-react-native",
     "version": "1.0.0",
     "orientation": "portrait",
+
+    "icon": "./assets/images/icon.png",
+
     "scheme": "cineramareactnative",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,6 +16,11 @@
     },
 
     "android": {
+      "icon": "./assets/images/icon.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#111111"
+      },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.pablo20261991.cineramareactnative"
