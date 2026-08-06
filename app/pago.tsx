@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StatusBar, Text, TextInput, View,} from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { API_URL } from "../services/api";
 
 type MetodoPago = "tarjeta" | "billetera" | "";
 type Billetera = "Yape" | "Plin" | "";
@@ -256,7 +257,7 @@ export default function Pago() {
         }
 
         const response = await fetch(
-            `http://192.168.1.37:3001/api/reservas/${reservaId}/pagar`,
+            `${API_URL}/api/reservas/${reservaId}/pagar`,
             {
             method: "PUT",
 
@@ -319,7 +320,7 @@ export default function Pago() {
 
         try {
         const responseCorreo = await fetch(
-            `http://192.168.1.37:3001/api/reservas/${reservaId}/enviar-voucher`,
+            `${API_URL}/api/reservas/${reservaId}/enviar-voucher`,
             {
             method: "POST",
             headers: {

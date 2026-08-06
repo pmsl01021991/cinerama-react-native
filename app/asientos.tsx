@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useState, useEffect, } from "react";
 import {Alert, Pressable, ScrollView, StatusBar, Text, View,} from "react-native";
 import { SafeAreaView, useSafeAreaInsets, } from "react-native-safe-area-context";
+import { API_URL } from "../services/api";
 
 const PRECIO_ENTRADA = 12;
 
@@ -65,7 +66,7 @@ export default function Asientos() {
         setCargandoOcupados(true);
 
         const url =
-            `http://192.168.1.37:3001/api/reservas/ocupados/` +
+            `${API_URL}/api/reservas/ocupados/` +
             `${encodeURIComponent(cine)}/` +
             `${encodeURIComponent(titulo)}/` +
             `${encodeURIComponent(sala)}/` +
@@ -182,7 +183,7 @@ export default function Asientos() {
         // =====================================================
 
         const response = await fetch(
-        `http://192.168.1.37:3001/api/reservas/${reservaId}`,
+        `${API_URL}/api/reservas/${reservaId}`,
         {
             method: "PUT",
 
