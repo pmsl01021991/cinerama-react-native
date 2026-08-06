@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Image, Modal, Pressable, ScrollView, StatusBar, Text, View, Alert,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect, } from "react";
+import { API_URL } from "../services/api";
 
 type PeliculaInfo = {
   id: number;
@@ -55,7 +56,7 @@ export default function Info() {
 
   const peliculas: PeliculaInfo[] = [
     {
-      id: 1,
+      id: 9,
       titulo: "EL AFINADOR",
       director: "DANIEL ROHER",
       duracion: "1h 47min",
@@ -73,7 +74,7 @@ export default function Info() {
     },
 
     {
-      id: 2,
+      id: 10,
       titulo: "SUPER GIRL",
       director: "CRAIG GILLESPIE",
       duracion: "1h 48min",
@@ -91,7 +92,7 @@ export default function Info() {
     },
 
     {
-      id: 3,
+      id: 11,
       titulo: "TOY STORY",
       director: "MCKENNA HARRIS, ANDREW STANTON",
       duracion: "1h 42min",
@@ -109,7 +110,7 @@ export default function Info() {
     },
 
     {
-      id: 4,
+      id: 12,
       titulo: "EL DÍA DE LA REVELACIÓN",
       director: "STEVEN SPIELBERG",
       duracion: "2h 25min",
@@ -148,7 +149,7 @@ export default function Info() {
         setCargandoFunciones(true);
 
         const response = await fetch(
-            `http://192.168.1.37:3001/api/reservas/funciones/${cineId}/${peliculaId}`
+            `${API_URL}/api/reservas/funciones/${cineId}/${peliculaId}`
         );
 
         if (!response.ok) {
@@ -224,7 +225,7 @@ const seleccionarFuncion = async (funcion: Funcion) => {
     // ==========================================
 
     const response = await fetch(
-      `http://192.168.1.37:3001/api/reservas/${reservaId}`,
+      `${API_URL}/api/reservas/${reservaId}`,
       {
         method: "PUT",
 

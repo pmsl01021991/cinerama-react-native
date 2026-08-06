@@ -1,4 +1,4 @@
-export const API_URL = "http://192.168.1.37:3001";
+export const API_URL = "https://cinerama-backen-react-native.onrender.com";
 
 export const API = {
   // AUTH

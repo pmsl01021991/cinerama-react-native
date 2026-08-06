@@ -32,12 +32,6 @@ export default function Cines() {
   const [cineCargando, setCineCargando] =
     useState<number | null>(null);
 
-  // ==========================================
-  // CINES
-  // Por ahora locales.
-  // Después los traeremos desde MySQL.
-  // ==========================================
-
   const cines: Cine[] = [
     {
       id: 1,
@@ -184,21 +178,10 @@ export default function Cines() {
         reservaId
       );
 
-      // ======================================
-      // CONTINUAR A CARTELERA
-      // ======================================
-
-      // ======================================
-      // DECIDIR A DÓNDE CONTINUAR
-      // ======================================
-
       if (
         origen === "cartelera" &&
         peliculaSeleccionada
       ) {
-        // Venimos de Cartelera y ya existe
-        // una película seleccionada.
-        // Vamos directamente a su información.
 
         router.push({
           pathname: "/info",
@@ -213,10 +196,6 @@ export default function Cines() {
 
         return;
       }
-
-      // ======================================
-      // FLUJO NORMAL DESDE CINES
-      // ======================================
 
       router.push({
         pathname: "/cartelera",

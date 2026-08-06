@@ -44,56 +44,56 @@ export default function Inicio() {
     };
 
   const peliculasCartelera: Pelicula[] = [
-    {
-      id: 1,
-      titulo: "EL AFINADOR",
-      poster: require("../assets/images/el_afinador.jpg"),
-      clasificacion: "14+",
-    },
-    {
-      id: 2,
-      titulo: "SUPER GIRL",
-      poster: require("../assets/images/super_girl.jpg"),
-      clasificacion: "TE",
-    },
-    {
-      id: 3,
-      titulo: "TOY STORY",
-      poster: require("../assets/images/toy_story.webp"),
-      clasificacion: "TE",
-    },
-    {
-      id: 4,
-      titulo: "EL DÍA DE LA REVELACIÓN",
-      poster: require("../assets/images/el_dia_de_la_revelacion.webp"),
-      clasificacion: "14+",
-    },
-  ];
+      {
+        id: 1,
+        titulo: "EL AFINADOR",
+        poster: require("../assets/images/el_afinador.jpg"),
+        clasificacion: "14+",
+      },
+      {
+        id: 2,
+        titulo: "SUPER GIRL",
+        poster: require("../assets/images/super_girl.jpg"),
+        clasificacion: "TE",
+      },
+      {
+        id: 3,
+        titulo: "TOY STORY",
+        poster: require("../assets/images/toy_story.webp"),
+        clasificacion: "TE",
+      },
+      {
+        id: 4,
+        titulo: "EL DÍA DE LA REVELACIÓN",
+        poster: require("../assets/images/el_dia_de_la_revelacion.webp"),
+        clasificacion: "14+",
+      },
+    ];
 
-  const peliculasEstreno: Pelicula[] = [
+    const peliculasEstreno: Pelicula[] = [
     {
       id: 5,
-      titulo: "EL VIAJE DE CHIHIRO",
-      poster: require("../assets/images/estrenos/chihiro.png"),
-      clasificacion: "TE",
-    },
-    {
-      id: 6,
-      titulo: "STANS",
-      poster: require("../assets/images/estrenos/stans.png"),
+      titulo: "RESIDENT EVIL",
+      poster: require("../assets/images/estrenos/resident_evil.jpg"),
       clasificacion: "18+",
     },
     {
+      id: 6,
+      titulo: "STREET FIGHTER",
+      poster: require("../assets/images/estrenos/street_fighter.jpg"),
+      clasificacion: "14+",
+    },
+    {
       id: 7,
-      titulo: "LIVE VIEWING",
-      poster: require("../assets/images/estrenos/live.png"),
+      titulo: "THE HUNGER GAMES: SUNRISE ON THE REAPING",
+      poster: require("../assets/images/estrenos/hunger_games.jpg"),
       clasificacion: "14+",
     },
     {
       id: 8,
-      titulo: "MIRACULOUS",
-      poster: require("../assets/images/estrenos/miraculo.png"),
-      clasificacion: "TE",
+      titulo: "AVENGERS: DOOMSDAY",
+      poster: require("../assets/images/estrenos/avengers_doomsday.jpg"),
+      clasificacion: "14+",
     },
   ];
 
