@@ -25,7 +25,7 @@ export default function Estrenos() {
       id: 5,
       titulo: "RESIDENT EVIL",
       poster: require("../assets/images/estrenos/resident_evil.jpg"),
-      clasificacion: "18+",
+      clasificacion: "14+",
       genero: "Terror / Acción",
       duracion: "1h 30min",
     },

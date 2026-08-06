@@ -4,6 +4,7 @@ import { Image, Modal, Pressable, ScrollView, StatusBar, Text, View, Alert,} fro
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useState, useEffect, } from "react";
 import { API_URL } from "../services/api";
+import { VideoView, useVideoPlayer } from "expo-video";
 
 type PeliculaInfo = {
   id: number;
@@ -14,6 +15,7 @@ type PeliculaInfo = {
   reparto: string;
   sinopsis: string;
   poster: any;
+  trailer: any;
   clasificacion: string;
   genero: string;
   sala: string;
@@ -66,6 +68,7 @@ export default function Info() {
       sinopsis:
         "Harry Horowitz es un veterano afinador de pianos que trabaja junto a Niki, su leal y talentoso aprendiz, quien padece hiperacusia. Cuando el joven descubre una inesperada habilidad para abrir cajas fuertes, termina involucrado en un peligroso mundo criminal que cambiará su vida por completo.",
       poster: require("../assets/images/el_afinador.jpg"),
+      trailer: require("../assets/videos/el_afinador.mp4"),
       clasificacion: "14+",
       genero: "Drama",
       sala: "01",
@@ -84,6 +87,7 @@ export default function Info() {
       sinopsis:
         "Kara, la prima de Superman, se ha ido haciendo más fuerte con el paso de los años. Mientras viaja por diferentes lugares conoce a Ruthye, una joven que busca venganza por el asesinato de su padre.",
       poster: require("../assets/images/super_girl.jpg"),
+      trailer: require("../assets/videos/super_girl.mp4"),
       clasificacion: "TE",
       genero: "Aventura",
       sala: "02",
@@ -102,6 +106,7 @@ export default function Info() {
       sinopsis:
         "Los juguetes están de vuelta. Buzz Lightyear, Woody, Jessie y el resto de la pandilla se enfrentan a un nuevo reto cuando conocen a Lilypad, una nueva tablet que llega con sus propias ideas sobre lo que es mejor para Bonnie.",
       poster: require("../assets/images/toy_story.webp"),
+      trailer: require("../assets/videos/toy_story.mp4"),
       clasificacion: "TE",
       genero: "Animación",
       sala: "03",
@@ -120,6 +125,7 @@ export default function Info() {
       sinopsis:
         "En un futuro no muy lejano, la humanidad está a punto de descubrir la verdad sobre la existencia de extraterrestres, un secreto que ha permanecido oculto durante décadas.",
       poster: require("../assets/images/el_dia_de_la_revelacion.webp"),
+      trailer: require("../assets/videos/el_dia_de_la_revelacion.mp4"),
       clasificacion: "14+",
       genero: "Ciencia ficción",
       sala: "04",
@@ -133,10 +139,21 @@ export default function Info() {
   // =====================================================
 
   const pelicula = peliculas.find((p) => p.id === peliculaId);
+    const player = useVideoPlayer(
+      pelicula?.trailer ?? null,
+      (player) => {
+        player.loop = false;
+      }
+    );
 
-    // =====================================================
-    // CARGAR FUNCIONES DESDE MYSQL
-    // =====================================================
+    useEffect(() => {
+      if (modalVisible && pelicula?.trailer) {
+        player.currentTime = 0;
+        player.play();
+      } else {
+        player.pause();
+      }
+    }, [modalVisible]);
 
     useEffect(() => {
     const cargarFunciones = async () => {
@@ -591,6 +608,8 @@ const seleccionarFuncion = async (funcion: Funcion) => {
       >
         <View className="flex-1 items-center justify-center bg-black/90 px-5">
           <View className="w-full rounded-2xl bg-gray-900 p-5">
+
+            {/* TÍTULO Y CERRAR */}
             <View className="flex-row items-center justify-between">
               <Text className="flex-1 text-xl font-black text-white">
                 {pelicula.titulo}
@@ -608,22 +627,38 @@ const seleccionarFuncion = async (funcion: Funcion) => {
               </Pressable>
             </View>
 
-            <View className="mt-4 h-52 items-center justify-center rounded-xl bg-black">
-              <Ionicons
-                name="play-circle"
-                size={70}
-                color="#dc2626"
-              />
+            {/* REPRODUCTOR */}
+            <View className="mt-4 overflow-hidden rounded-xl bg-black">
+              {pelicula.trailer ? (
+                <VideoView
+                  player={player}
+                  style={{
+                    width: "100%",
+                    height: 230,
+                  }}
+                  nativeControls
+                  contentFit="contain"
+                  allowsFullscreen
+                />
+              ) : (
+                <View
+                  style={{ height: 230 }}
+                  className="items-center justify-center"
+                >
+                  <Ionicons
+                    name="videocam-off-outline"
+                    size={55}
+                    color="#9ca3af"
+                  />
 
-              <Text className="mt-3 text-center font-bold text-white">
-                Tráiler de {pelicula.titulo}
-              </Text>
-
-              <Text className="mt-1 text-center text-xs text-gray-400">
-                El reproductor de YouTube lo conectaremos después.
-              </Text>
+                  <Text className="mt-3 font-bold text-white">
+                    Tráiler no disponible
+                  </Text>
+                </View>
+              )}
             </View>
 
+            {/* BOTÓN CERRAR */}
             <Pressable
               onPress={() => setModalVisible(false)}
               className="mt-5 rounded-xl bg-red-600 py-3"
@@ -632,6 +667,7 @@ const seleccionarFuncion = async (funcion: Funcion) => {
                 Cerrar
               </Text>
             </Pressable>
+
           </View>
         </View>
       </Modal>

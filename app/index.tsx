@@ -54,13 +54,13 @@ export default function Inicio() {
         id: 2,
         titulo: "SUPER GIRL",
         poster: require("../assets/images/super_girl.jpg"),
-        clasificacion: "TE",
+        clasificacion: "14+",
       },
       {
         id: 3,
         titulo: "TOY STORY",
         poster: require("../assets/images/toy_story.webp"),
-        clasificacion: "TE",
+        clasificacion: "14+",
       },
       {
         id: 4,
@@ -75,7 +75,7 @@ export default function Inicio() {
       id: 5,
       titulo: "RESIDENT EVIL",
       poster: require("../assets/images/estrenos/resident_evil.jpg"),
-      clasificacion: "18+",
+      clasificacion: "14+",
     },
     {
       id: 6,

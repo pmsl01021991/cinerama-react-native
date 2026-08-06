@@ -1,19 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  StatusBar,
-  Text,
-  View,
-} from "react-native";
+import { Image, Pressable, ScrollView, StatusBar, Text, View, Modal} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { VideoView, useVideoPlayer } from "expo-video";
+import { useState } from "react";
 
 type PeliculaEstreno = {
   id: number;
   titulo: string;
   poster: any;
+  trailer: any;
   director: string;
   duracion: string;
   estreno: string;
@@ -27,6 +23,7 @@ const peliculasEstreno: PeliculaEstreno[] = [
     id: 5,
     titulo: "RESIDENT EVIL",
     poster: require("../assets/images/estrenos/resident_evil.jpg"),
+    trailer: require("../assets/videos/resident_evil.mp4"),
     director: "Zach Cregger",
     duracion: "01:30:00",
     estreno: "18/09/2026",
@@ -34,13 +31,14 @@ const peliculasEstreno: PeliculaEstreno[] = [
       "Austin Abrams, Zach Cherry, Kali Reis, Paul Walter Hauser",
     sinopsis:
       "Bryan, un mensajero médico, queda atrapado en una aterradora noche de caos y debe luchar por sobrevivir mientras todo a su alrededor se descontrola.",
-    categorias: ["TERROR", "ACCIÓN", "18+"],
+    categorias: ["TERROR", "ACCIÓN", "14+"],
   },
 
   {
     id: 6,
     titulo: "STREET FIGHTER",
     poster: require("../assets/images/estrenos/street_fighter.jpg"),
+    trailer: require("../assets/videos/street_fighter.mp4"),
     director: "Kitao Sakurai",
     duracion: "Por confirmar",
     estreno: "16/10/2026",
@@ -55,6 +53,7 @@ const peliculasEstreno: PeliculaEstreno[] = [
     id: 7,
     titulo: "THE HUNGER GAMES: SUNRISE ON THE REAPING",
     poster: require("../assets/images/estrenos/hunger_games.jpg"),
+    trailer: require("../assets/videos/hunger_games.mp4"),
     director: "Francis Lawrence",
     duracion: "Por confirmar",
     estreno: "20/11/2026",
@@ -69,6 +68,7 @@ const peliculasEstreno: PeliculaEstreno[] = [
     id: 8,
     titulo: "AVENGERS: DOOMSDAY",
     poster: require("../assets/images/estrenos/avengers_doomsday.jpg"),
+    trailer: require("../assets/videos/avengers.mp4"),
     director: "Anthony Russo, Joe Russo",
     duracion: "Por confirmar",
     estreno: "18/12/2026",
@@ -81,12 +81,20 @@ const peliculasEstreno: PeliculaEstreno[] = [
 ];
 
 export default function InfoEstreno() {
+  const [modalVisible, setModalVisible] = useState(false);
   const { pelicula } = useLocalSearchParams<{
     pelicula: string;
   }>();
 
   const peliculaSeleccionada = peliculasEstreno.find(
     (item) => item.id === Number(pelicula)
+  );
+
+  const player = useVideoPlayer(
+    peliculaSeleccionada?.trailer ?? null,
+    (player) => {
+      player.loop = false;
+    }
   );
 
   if (!peliculaSeleccionada) {
@@ -208,6 +216,27 @@ export default function InfoEstreno() {
             )}
           </View>
 
+          {/* VER TRÁILER */}
+
+            <Pressable
+              onPress={() => {
+                player.currentTime = 0;
+                player.play();
+                setModalVisible(true);
+              }}
+              className="mt-3 flex-row items-center justify-center rounded-xl bg-red-600 py-3"
+            >
+              <Ionicons
+                name="play-circle-outline"
+                size={23}
+                color="white"
+              />
+
+              <Text className="ml-2 font-black text-white">
+                Ver tráiler
+              </Text>
+            </Pressable>
+
           {/* DATOS */}
 
           <View className="mt-4">
@@ -278,6 +307,81 @@ export default function InfoEstreno() {
           </View>
         </View>
       </ScrollView>
+
+      {/* MODAL TRÁILER */}
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          player.pause();
+          setModalVisible(false);
+        }}
+      >
+        <View className="flex-1 items-center justify-center bg-black/90 px-5">
+
+          <View className="w-full rounded-2xl bg-gray-900 p-5">
+
+            {/* TÍTULO */}
+
+            <View className="flex-row items-center justify-between">
+
+              <Text className="flex-1 text-xl font-black text-white">
+                {peliculaSeleccionada.titulo}
+              </Text>
+
+              <Pressable
+                onPress={() => {
+                  player.pause();
+                  setModalVisible(false);
+                }}
+                className="h-10 w-10 items-center justify-center"
+              >
+                <Ionicons
+                  name="close"
+                  size={30}
+                  color="white"
+                />
+              </Pressable>
+
+            </View>
+
+            {/* VIDEO */}
+
+            <View className="mt-4 overflow-hidden rounded-xl bg-black">
+
+              <VideoView
+                player={player}
+                style={{
+                  width: "100%",
+                  height: 230,
+                }}
+                nativeControls
+                contentFit="contain"
+                allowsFullscreen
+              />
+
+            </View>
+
+            {/* CERRAR */}
+
+            <Pressable
+              onPress={() => {
+                player.pause();
+                setModalVisible(false);
+              }}
+              className="mt-5 rounded-xl bg-red-600 py-3"
+            >
+              <Text className="text-center font-black text-white">
+                Cerrar
+              </Text>
+            </Pressable>
+
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
