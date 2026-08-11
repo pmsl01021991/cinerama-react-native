@@ -36,7 +36,7 @@ export default function Cartelera() {
 
   const peliculas: Pelicula[] = [
     {
-      id: 9,
+      id: 1,
       titulo: "EL AFINADOR",
       poster: require("../assets/images/el_afinador.jpg"),
       clasificacion: "14+",
@@ -44,7 +44,7 @@ export default function Cartelera() {
       duracion: "1h 47min",
     },
     {
-      id: 10,
+      id: 2,
       titulo: "SUPER GIRL",
       poster: require("../assets/images/super_girl.jpg"),
       clasificacion: "TE",
@@ -52,7 +52,7 @@ export default function Cartelera() {
       duracion: "1h 48min",
     },
     {
-      id: 11,
+      id: 3,
       titulo: "TOY STORY",
       poster: require("../assets/images/toy_story.webp"),
       clasificacion: "TE",
@@ -60,7 +60,7 @@ export default function Cartelera() {
       duracion: "1h 42min",
     },
     {
-      id: 12,
+      id: 4,
       titulo: "EL DÍA DE LA REVELACIÓN",
       poster: require("../assets/images/el_dia_de_la_revelacion.webp"),
       clasificacion: "14+",

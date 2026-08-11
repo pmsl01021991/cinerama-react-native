@@ -8,6 +8,7 @@ import { VideoView, useVideoPlayer } from "expo-video";
 
 type PeliculaInfo = {
   id: number;
+  codigo: string;
   titulo: string;
   director: string;
   duracion: string;
@@ -25,12 +26,13 @@ type PeliculaInfo = {
 
 type Funcion = {
   id: number;
-  cine_id: number;
-  pelicula_id: number;
+  cine: string;
+  pelicula_codigo: string;
+  pelicula_titulo: string;
   tipo_cine: "2D" | "3D";
   sala: string;
   fecha: string;
-  horario: string;
+  hora: string;
   precio: string;
 };
 
@@ -58,7 +60,8 @@ export default function Info() {
 
   const peliculas: PeliculaInfo[] = [
     {
-      id: 9,
+      id: 1,
+      codigo: "elAfinador",
       titulo: "EL AFINADOR",
       director: "DANIEL ROHER",
       duracion: "1h 47min",
@@ -77,7 +80,8 @@ export default function Info() {
     },
 
     {
-      id: 10,
+      id: 2,
+      codigo: "superGirl",
       titulo: "SUPER GIRL",
       director: "CRAIG GILLESPIE",
       duracion: "1h 48min",
@@ -88,7 +92,7 @@ export default function Info() {
         "Kara, la prima de Superman, se ha ido haciendo más fuerte con el paso de los años. Mientras viaja por diferentes lugares conoce a Ruthye, una joven que busca venganza por el asesinato de su padre.",
       poster: require("../assets/images/super_girl.jpg"),
       trailer: require("../assets/videos/super_girl.mp4"),
-      clasificacion: "TE",
+      clasificacion: "14+",
       genero: "Aventura",
       sala: "02",
       horarios2D: ["3:30 PM", "6:30 PM"],
@@ -96,7 +100,8 @@ export default function Info() {
     },
 
     {
-      id: 11,
+      id: 3,
+      codigo: "toyStory",
       titulo: "TOY STORY",
       director: "MCKENNA HARRIS, ANDREW STANTON",
       duracion: "1h 42min",
@@ -107,7 +112,7 @@ export default function Info() {
         "Los juguetes están de vuelta. Buzz Lightyear, Woody, Jessie y el resto de la pandilla se enfrentan a un nuevo reto cuando conocen a Lilypad, una nueva tablet que llega con sus propias ideas sobre lo que es mejor para Bonnie.",
       poster: require("../assets/images/toy_story.webp"),
       trailer: require("../assets/videos/toy_story.mp4"),
-      clasificacion: "TE",
+      clasificacion: "APT",
       genero: "Animación",
       sala: "03",
       horarios2D: ["2:00 PM", "5:00 PM"],
@@ -115,7 +120,8 @@ export default function Info() {
     },
 
     {
-      id: 12,
+      id: 4,
+      codigo: "diaRevelacion",
       titulo: "EL DÍA DE LA REVELACIÓN",
       director: "STEVEN SPIELBERG",
       duracion: "2h 25min",
@@ -156,44 +162,47 @@ export default function Info() {
     }, [modalVisible]);
 
     useEffect(() => {
-    const cargarFunciones = async () => {
-        if (!cineId || !peliculaId) {
-        setCargandoFunciones(false);
-        return;
+      const cargarFunciones = async () => {
+        if (!cine || !pelicula?.codigo) {
+          setFunciones([]);
+          setCargandoFunciones(false);
+          return;
         }
 
         try {
-        setCargandoFunciones(true);
+          setCargandoFunciones(true);
 
-        const response = await fetch(
-            `${API_URL}/api/reservas/funciones/${cineId}/${peliculaId}`
-        );
+          const response = await fetch(
+            `${API_URL}/api/reservas/funciones?cine=${encodeURIComponent(cine)}`
+          );
 
-        if (!response.ok) {
+          if (!response.ok) {
             throw new Error(
-            `Error cargando funciones: ${response.status}`
+              `Error cargando funciones: ${response.status}`
             );
-        }
+          }
 
-        const data = await response.json();
+          const data = await response.json();
 
-        setFunciones(
-            Array.isArray(data) ? data : []
-        );
+          const funcionesPelicula = Array.isArray(data)
+            ? data.filter(
+                (funcion: Funcion) =>
+                  funcion.pelicula_codigo === pelicula.codigo
+              )
+            : [];
+
+          setFunciones(funcionesPelicula);
+
         } catch (error) {
-        console.error(
-            "Error cargando funciones:",
-            error
-        );
-
-        setFunciones([]);
+          console.error("Error cargando funciones:", error);
+          setFunciones([]);
         } finally {
-        setCargandoFunciones(false);
+          setCargandoFunciones(false);
         }
-    };
+      };
 
-    cargarFunciones();
-    }, [cineId, peliculaId]);
+      cargarFunciones();
+    }, [cine, pelicula?.codigo]);
 
   // =====================================================
   // PELÍCULA NO ENCONTRADA
@@ -252,11 +261,11 @@ const seleccionarFuncion = async (funcion: Funcion) => {
 
         body: JSON.stringify({
           funcion_id: funcion.id,
-          pelicula_codigo: pelicula.id.toString(),
+          pelicula_codigo: pelicula.codigo,
           pelicula_titulo: pelicula.titulo,
           tipo_cine: funcion.tipo_cine,
           sala: funcion.sala,
-          horario: funcion.horario,
+          horario: funcion.hora,
           estado: "RESERVADO",
         }),
       }
@@ -291,11 +300,12 @@ const seleccionarFuncion = async (funcion: Funcion) => {
         cine,
 
         peliculaId: pelicula.id.toString(),
+        peliculaCodigo: pelicula.codigo,
         titulo: pelicula.titulo,
 
         funcionId: funcion.id.toString(),
         sala: funcion.sala,
-        horario: funcion.horario,
+        horario: funcion.hora,
         tipoCine: funcion.tipo_cine,
         precio: funcion.precio,
       },
@@ -585,7 +595,7 @@ const seleccionarFuncion = async (funcion: Funcion) => {
                             : "text-white"
                         }`}
                         >
-                        {funcion.horario}
+                        {funcion.hora}
                         </Text>
                     </View>
                     </Pressable>

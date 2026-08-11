@@ -5,8 +5,6 @@ import {Alert, Pressable, ScrollView, StatusBar, Text, View,} from "react-native
 import { SafeAreaView, useSafeAreaInsets, } from "react-native-safe-area-context";
 import { API_URL } from "../services/api";
 
-const PRECIO_ENTRADA = 12;
-
 // =====================================================
 // CONFIGURACIÓN DE SALAS
 // Equivale a salas.json
@@ -30,11 +28,18 @@ export default function Asientos() {
     cineId?: string;
     cine?: string;
     peliculaId?: string;
+    peliculaCodigo?: string;
     titulo?: string;
     sala?: string;
     horario?: string;
     tipoCine?: string;
-    }>();
+    funcionId?: string;
+    precio?: string;
+  }>();
+
+    const peliculaCodigo = params.peliculaCodigo ?? "";
+    const precio = Number(params.precio ?? 12);
+    const funcionId = params.funcionId ?? "";
 
     const reservaId = params.reservaId ?? "";
     const cineId = params.cineId ?? "";
@@ -46,9 +51,9 @@ export default function Asientos() {
     const horario = params.horario ?? "-";
     const tipoCine = params.tipoCine === "3D" ? "3D" : "2D";
 
-  const [seleccionados, setSeleccionados] = useState<string[]>([]);
+    const [seleccionados, setSeleccionados] = useState<string[]>([]);
 
-  const [ocupados, setOcupados] = useState<string[]>([]);
+    const [ocupados, setOcupados] = useState<string[]>([]);
     const [cargandoOcupados, setCargandoOcupados] = useState(true);
 
     // =====================================================
@@ -56,56 +61,56 @@ export default function Asientos() {
     // =====================================================
 
     useEffect(() => {
-    const cargarOcupados = async () => {
-        if (!cine || !titulo || !sala || !horario) {
-        setCargandoOcupados(false);
-        return;
+      const cargarOcupados = async () => {
+        if (!funcionId) {
+          console.log("⚠️ No se recibió funcionId");
+          setCargandoOcupados(false);
+          return;
         }
 
         try {
-        setCargandoOcupados(true);
+          setCargandoOcupados(true);
 
-        const url =
-            `${API_URL}/api/reservas/ocupados/` +
-            `${encodeURIComponent(cine)}/` +
-            `${encodeURIComponent(titulo)}/` +
-            `${encodeURIComponent(sala)}/` +
-            `${encodeURIComponent(horario)}`;
+          const url =
+            `${API_URL}/api/reservas/ocupados/funcion/` +
+            `${encodeURIComponent(funcionId)}`;
 
-        const response = await fetch(url);
+          const response = await fetch(url);
 
-        if (!response.ok) {
+          if (!response.ok) {
             throw new Error(
-            `Error cargando asientos: ${response.status}`
+              `Error cargando asientos: ${response.status}`
             );
-        }
+          }
 
-        const data = await response.json();
+          const data = await response.json();
 
-        setOcupados(
+          setOcupados(
             Array.isArray(data.ocupados)
-            ? data.ocupados
-            : []
-        );
+              ? data.ocupados
+              : []
+          );
+
         } catch (error) {
-        console.error(
+          console.error(
             "Error cargando asientos ocupados:",
             error
-        );
+          );
 
-        Alert.alert(
+          Alert.alert(
             "Error",
             "No se pudieron cargar los asientos ocupados."
-        );
+          );
 
-        setOcupados([]);
+          setOcupados([]);
+
         } finally {
-        setCargandoOcupados(false);
+          setCargandoOcupados(false);
         }
-    };
+      };
 
-    cargarOcupados();
-    }, [cine, titulo, sala, horario]);
+      cargarOcupados();
+    }, [funcionId]);
 
   const config = CONFIG_SALAS[tipoCine];
 
@@ -152,7 +157,7 @@ export default function Asientos() {
   // TOTAL
   // =====================================================
 
-  const total = seleccionados.length * PRECIO_ENTRADA;
+  const total = seleccionados.length * precio;
 
   // =====================================================
   // CONTINUAR
@@ -192,10 +197,11 @@ export default function Asientos() {
             },
 
             body: JSON.stringify({
-            asientos: seleccionados.join(","),
-            cantidad_entradas: seleccionados.length,
-            monto_entradas: total,
-            estado: "RESERVADO",
+              funcion_id: Number(funcionId),
+              asientos: seleccionados.join(","),
+              cantidad_entradas: seleccionados.length,
+              monto_entradas: total,
+              estado: "RESERVADO",
             }),
         }
         );
@@ -270,6 +276,7 @@ export default function Asientos() {
             sala,
             horario,
             tipoCine,
+            funcionId,
 
             asientos: seleccionados.join(", "),
             cantidadEntradas:
@@ -582,7 +589,7 @@ export default function Asientos() {
               </Text>
 
               <Text className="font-black text-gray-900">
-                S/ {PRECIO_ENTRADA.toFixed(2)}
+                S/ {precio.toFixed(2)}
               </Text>
             </View>
 
