@@ -4,10 +4,6 @@ import { useMemo, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, StatusBar, Text, View,} from "react-native";
 import { SafeAreaView, useSafeAreaInsets, } from "react-native-safe-area-context";
 
-// =========================================================
-// TIPOS
-// =========================================================
-
 type Producto = {
   id: number;
   nombre: string;
@@ -20,11 +16,6 @@ type Producto = {
 type Carrito = {
   [productoId: number]: number;
 };
-
-// =========================================================
-// PRODUCTOS
-// Los mismos que tenías en comida.js
-// =========================================================
 
 const PRODUCTOS: Producto[] = [
   {
@@ -63,10 +54,6 @@ const PRODUCTOS: Producto[] = [
     categoria: "Bebida",
     precio: 4,
     desc: "Agua sin gas (500ml)",
-
-    // Después puedes reemplazarla por tu imagen local:
-    // require("../assets/images/aguasingas.webp")
-
     imagen: {
       uri: "https://images.unsplash.com/photo-1564419320461-6870880221ad?auto=format&fit=crop&w=900&q=60",
     },
@@ -93,30 +80,26 @@ const PRODUCTOS: Producto[] = [
   },
 ];
 
-// =========================================================
-// PANTALLA COMIDA
-// =========================================================
-
 export default function Comida() {
   const insets = useSafeAreaInsets();
-  // =======================================================
-  // RECIBIR DATOS DE ASIENTOS
-  // =======================================================
 
   const params = useLocalSearchParams<{
-    reservaId?: string;
+    cineId?: string;
+    cine?: string;
     peliculaId?: string;
     titulo?: string;
     sala?: string;
     horario?: string;
     tipoCine?: string;
+    funcionId?: string;
     asientos?: string;
     cantidadEntradas?: string;
     montoEntradas?: string;
     }>();
 
-const reservaId = params.reservaId ?? "";
-
+  const cineId = params.cineId ?? "";
+  const cine = params.cine ?? "";
+  const funcionId = params.funcionId ?? "";
   const peliculaId = params.peliculaId ?? "";
   const titulo = params.titulo ?? "Película";
   const sala = params.sala ?? "-";
@@ -132,15 +115,7 @@ const reservaId = params.reservaId ?? "";
     params.montoEntradas ?? 0
   );
 
-  // =======================================================
-  // CARRITO
-  // =======================================================
-
   const [carrito, setCarrito] = useState<Carrito>({});
-
-  // =======================================================
-  // CAMBIAR CANTIDAD
-  // =======================================================
 
   const cambiarCantidad = (
     productoId: number,
@@ -168,10 +143,6 @@ const reservaId = params.reservaId ?? "";
     });
   };
 
-  // =======================================================
-  // AGREGAR PRODUCTO
-  // =======================================================
-
   const agregarProducto = (productoId: number) => {
     setCarrito((actual) => {
       const cantidadActual = actual[productoId] ?? 0;
@@ -186,10 +157,6 @@ const reservaId = params.reservaId ?? "";
     });
   };
 
-  // =======================================================
-  // TOTAL PRODUCTOS
-  // =======================================================
-
   const totalProductos = useMemo(() => {
     return PRODUCTOS.reduce((total, producto) => {
       const cantidad = carrito[producto.id] ?? 0;
@@ -198,26 +165,14 @@ const reservaId = params.reservaId ?? "";
     }, 0);
   }, [carrito]);
 
-  // =======================================================
-  // PRODUCTOS DEL RESUMEN
-  // =======================================================
-
   const productosSeleccionados = useMemo(() => {
     return PRODUCTOS.filter(
       (producto) => (carrito[producto.id] ?? 0) > 0
     );
   }, [carrito]);
 
-  // =======================================================
-  // TOTAL GENERAL
-  // =======================================================
-
   const totalGeneral =
     montoEntradas + totalProductos;
-
-  // =======================================================
-  // CONTINUAR A PAGO
-  // =======================================================
 
   const continuarPago = () => {
     const productos = productosSeleccionados.map(
@@ -236,12 +191,14 @@ const reservaId = params.reservaId ?? "";
       pathname: "/pago",
 
       params: {
-        reservaId,
+        cineId,
+        cine,
         peliculaId,
         titulo,
         sala,
         horario,
         tipoCine,
+        funcionId,
         asientos,
 
         cantidadEntradas:
@@ -262,21 +219,19 @@ const reservaId = params.reservaId ?? "";
     });
   };
 
-  // =======================================================
-  // SALTAR COMIDA
-  // =======================================================
-
   const saltarComida = () => {
     router.push({
       pathname: "/pago",
 
       params: {
-        reservaId,
+        cineId,
+        cine,
         peliculaId,
         titulo,
         sala,
         horario,
         tipoCine,
+        funcionId,
         asientos,
 
         cantidadEntradas:

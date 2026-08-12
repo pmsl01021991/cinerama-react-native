@@ -24,7 +24,6 @@ const CONFIG_SALAS = {
 export default function Asientos() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{
-    reservaId?: string;
     cineId?: string;
     cine?: string;
     peliculaId?: string;
@@ -40,8 +39,6 @@ export default function Asientos() {
     const peliculaCodigo = params.peliculaCodigo ?? "";
     const precio = Number(params.precio ?? 12);
     const funcionId = params.funcionId ?? "";
-
-    const reservaId = params.reservaId ?? "";
     const cineId = params.cineId ?? "";
     const cine = params.cine ?? "";
 
@@ -160,147 +157,39 @@ export default function Asientos() {
   const total = seleccionados.length * precio;
 
   // =====================================================
-  // CONTINUAR
-  // =====================================================
+// CONTINUAR A COMIDA
+// =====================================================
 
-  const continuarCompra = async () => {
-    if (seleccionados.length === 0) {
-        Alert.alert(
-        "Selecciona tus asientos",
-        "Debes seleccionar al menos un asiento para continuar."
-        );
+const continuarCompra = () => {
+  if (seleccionados.length === 0) {
+    Alert.alert(
+      "Selecciona tus asientos",
+      "Debes seleccionar al menos un asiento para continuar."
+    );
 
-        return;
-    }
+    return;
+  }
 
-    if (!reservaId) {
-        Alert.alert(
-        "Error",
-        "No se encontró el identificador de la reserva."
-        );
+  router.push({
+    pathname: "/comida",
 
-        return;
-    }
+    params: {
+      cineId,
+      cine,
 
-    try {
-        // =====================================================
-        // GUARDAR ASIENTOS EN LA RESERVA
-        // =====================================================
+      peliculaId,
+      titulo,
+      sala,
+      horario,
+      tipoCine,
+      funcionId,
 
-        const response = await fetch(
-        `${API_URL}/api/reservas/${reservaId}`,
-        {
-            method: "PUT",
-
-            headers: {
-            "Content-Type": "application/json",
-            },
-
-            body: JSON.stringify({
-              funcion_id: Number(funcionId),
-              asientos: seleccionados.join(","),
-              cantidad_entradas: seleccionados.length,
-              monto_entradas: total,
-              estado: "RESERVADO",
-            }),
-        }
-        );
-
-        // =====================================================
-        // SI OTRO USUARIO TOMÓ EL ASIENTO
-        // =====================================================
-
-        if (response.status === 409) {
-        const data = await response.json();
-
-        const asientosConflicto =
-            Array.isArray(data.ocupados)
-            ? data.ocupados
-            : [];
-
-        setOcupados((actuales) => [
-            ...new Set([
-            ...actuales,
-            ...asientosConflicto,
-            ]),
-        ]);
-
-        setSeleccionados((actuales) =>
-            actuales.filter(
-            (asiento) =>
-                !asientosConflicto.includes(asiento)
-            )
-        );
-
-        Alert.alert(
-            "Asiento no disponible",
-            `Los siguientes asientos acaban de ser ocupados: ${asientosConflicto.join(
-            ", "
-            )}`
-        );
-
-        return;
-        }
-
-        if (!response.ok) {
-        const texto = await response.text();
-
-        console.log(
-            "Error guardando asientos:",
-            texto
-        );
-
-        Alert.alert(
-            "Error",
-            "No se pudieron guardar los asientos."
-        );
-
-        return;
-        }
-
-        // =====================================================
-        // IR A COMIDA
-        // =====================================================
-
-        router.push({
-        pathname: "/comida",
-
-        params: {
-            reservaId,
-
-            cineId,
-            cine,
-
-            peliculaId,
-            titulo,
-            sala,
-            horario,
-            tipoCine,
-            funcionId,
-
-            asientos: seleccionados.join(", "),
-            cantidadEntradas:
-            seleccionados.length.toString(),
-            montoEntradas:
-            total.toString(),
-        },
-        });
-    } catch (error) {
-        console.error(
-        "Error guardando asientos:",
-        error
-        );
-
-        Alert.alert(
-        "Error de conexión",
-        "No se pudo conectar con el servidor."
-        );
-    }
-    };
-
-  // =====================================================
-  // VOLVER
-  // =====================================================
+      asientos: seleccionados.join(", "),
+      cantidadEntradas: seleccionados.length.toString(),
+      montoEntradas: total.toString(),
+    },
+  });
+};
 
   const volver = () => {
     Alert.alert(
@@ -683,10 +572,6 @@ export default function Asientos() {
     </SafeAreaView>
   );
 }
-
-// =========================================================
-// LEYENDA
-// =========================================================
 
 type LeyendaProps = {
   tipo: "disponible" | "seleccionado" | "ocupado";

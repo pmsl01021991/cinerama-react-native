@@ -21,12 +21,10 @@ export default function Cartelera() {
   // =====================================================
 
   const params = useLocalSearchParams<{
-    reservaId?: string;
     cineId?: string;
     cine?: string;
   }>();
 
-  const reservaId = params.reservaId ?? "";
   const cineId = params.cineId ?? "";
   const cine = params.cine ?? "";
 
@@ -70,35 +68,27 @@ export default function Cartelera() {
   ];
 
  const abrirPelicula = (id: number) => {
-
-    if (!cineId || !cine || !reservaId) {
-      router.push({
-        pathname: "/cines",
-
-        params: {
-          pelicula: id.toString(),
-          origen: "cartelera",
-        },
-      });
-
-      return;
-    }
-
-    // =====================================================
-    // SI YA HAY CINE SELECCIONADO
-    // =====================================================
-
+  if (!cineId || !cine) {
     router.push({
-      pathname: "/info",
-
+      pathname: "/cines",
       params: {
         pelicula: id.toString(),
-        reservaId,
-        cineId,
-        cine,
+        origen: "cartelera",
       },
     });
-  };
+
+    return;
+  }
+
+  router.push({
+    pathname: "/info",
+    params: {
+      pelicula: id.toString(),
+      cineId,
+      cine,
+    },
+  });
+};
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">

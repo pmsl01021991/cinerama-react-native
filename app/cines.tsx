@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, StatusBar, Text, View,} from "react-native";
 import { SafeAreaView, useSafeAreaInsets,} from "react-native-safe-area-context";
 import BottomNav from "../components/BottomNav";
-import { API } from "../services/api";
 
 type Cine = {
   id: number;
@@ -16,10 +15,6 @@ type Cine = {
 
 export default function Cines() {
   const insets = useSafeAreaInsets();
-  // =====================================================
-  // SABER SI VENIMOS DESDE CARTELERA
-  // =====================================================
-
   const params = useLocalSearchParams<{
     pelicula?: string;
     origen?: string;
@@ -123,11 +118,7 @@ export default function Cines() {
     },
   ];
 
-  // ==========================================
-  // SELECCIONAR CINE + CREAR RESERVA
-  // ==========================================
-
-  const seleccionarCine = async (cine: Cine) => {
+  const seleccionarCine = (cine: Cine) => {
     // Evita múltiples pulsaciones
     if (cineCargando !== null) {
       return;
@@ -137,58 +128,18 @@ export default function Cines() {
 
     try {
       // ======================================
-      // CREAR RESERVA EN EL BACKEND
+      // SI VENIMOS DESDE CARTELERA
       // ======================================
-
-      const response = await fetch(API.reservas, {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          cine: cine.nombre,
-        }),
-      });
-
-      const data = await response.json();
-
-      // ======================================
-      // VALIDAR RESPUESTA
-      // ======================================
-
-      if (!response.ok) {
-        throw new Error(
-          data?.error ||
-            "No se pudo crear la reserva"
-        );
-      }
-
-      if (!data?.id) {
-        throw new Error(
-          "El servidor no devolvió el ID de la reserva"
-        );
-      }
-
-      const reservaId = data.id.toString();
-
-      console.log(
-        "Reserva creada correctamente:",
-        reservaId
-      );
 
       if (
         origen === "cartelera" &&
         peliculaSeleccionada
       ) {
-
         router.push({
           pathname: "/info",
 
           params: {
             pelicula: peliculaSeleccionada,
-            reservaId,
             cineId: cine.id.toString(),
             cine: cine.nombre,
           },
@@ -197,25 +148,18 @@ export default function Cines() {
         return;
       }
 
+      // ======================================
+      // FLUJO NORMAL
+      // ======================================
+
       router.push({
         pathname: "/cartelera",
 
         params: {
-          reservaId,
           cineId: cine.id.toString(),
           cine: cine.nombre,
         },
       });
-    } catch (error) {
-      console.error(
-        "Error creando reserva:",
-        error
-      );
-
-      Alert.alert(
-        "Error de conexión",
-        "No se pudo iniciar la reserva. Verifica que el backend esté encendido y que el celular esté conectado a la misma red Wi-Fi que la computadora."
-      );
     } finally {
       setCineCargando(null);
     }
@@ -387,7 +331,7 @@ export default function Cines() {
                           />
 
                           <Text className="ml-2 font-black text-white">
-                            Iniciando reserva...
+                            Cargando...
                           </Text>
                         </>
                       ) : (

@@ -10,12 +10,8 @@ type Billetera = "Yape" | "Plin" | "";
 
 export default function Pago() {
     const insets = useSafeAreaInsets();
-  // =====================================================
-  // DATOS QUE VIENEN DE COMIDA
-  // =====================================================
 
   const params = useLocalSearchParams<{
-    reservaId?: string;
     cineId?: string;
     cine?: string;
 
@@ -24,6 +20,7 @@ export default function Pago() {
     sala?: string;
     horario?: string;
     tipoCine?: string;
+    funcionId?: string;
     asientos?: string;
     cantidadEntradas?: string;
     montoEntradas?: string;
@@ -32,7 +29,6 @@ export default function Pago() {
     totalGeneral?: string;
     }>();
 
-  const reservaId = params.reservaId ?? "";
   const cineId = params.cineId ?? "";
   const cine = params.cine ?? "";
 
@@ -136,9 +132,6 @@ export default function Pago() {
     }
   };
 
-  // =====================================================
-  // PROCESAR PAGO
-  // =====================================================
 
   const procesarPago = async () => {
     if (!nombre.trim()) {
@@ -173,10 +166,6 @@ export default function Pago() {
       return;
     }
 
-    // ===============================================
-    // VALIDACIÓN TARJETA
-    // ===============================================
-
     if (metodoPago === "tarjeta") {
       const tarjetaLimpia =
         numeroTarjeta.replace(/\s/g, "");
@@ -205,10 +194,6 @@ export default function Pago() {
         return;
       }
     }
-
-    // ===============================================
-    // VALIDACIÓN BILLETERA
-    // ===============================================
 
     if (metodoPago === "billetera") {
       if (!billetera) {
@@ -246,177 +231,289 @@ export default function Pago() {
 
     setProcesando(true);
 
-        try {
-        if (!reservaId) {
-            Alert.alert(
-            "Error",
-            "No se encontró el identificador de la reserva."
-            );
-            setProcesando(false);
-            return;
-        }
+try {
+  // =====================================================
+  // PREPARAR PRODUCTOS
+  // =====================================================
 
-        const response = await fetch(
-            `${API_URL}/api/reservas/${reservaId}/pagar`,
-            {
-            method: "PUT",
+  const productos = JSON.parse(
+    params.productos ?? "[]"
+  );
 
-            headers: {
-                "Content-Type": "application/json",
-            },
+  // =====================================================
+  // PREPARAR ASIENTOS
+  // =====================================================
 
-            body: JSON.stringify({
-                nombre_cliente: nombre.trim(),
-                correo_cliente: correo.trim(),
+  const listaAsientos = asientos
+    .split(",")
+    .map((asiento) => asiento.trim())
+    .filter(Boolean);
 
-                metodo_pago: metodoPago,
+  if (listaAsientos.length === 0) {
+    Alert.alert(
+      "Error",
+      "No se encontraron los asientos seleccionados."
+    );
 
-                billetera:
-                metodoPago === "billetera"
-                    ? billetera
-                    : null,
+    return;
+  }
 
-                tipo_documento:
-                metodoPago === "billetera"
-                    ? tipoDocumento
-                    : null,
+  // =====================================================
+  // CONFIRMAR PAGO
+  // CREA LA RESERVA RECIÉN AQUÍ
+  // =====================================================
 
-                numero_documento:
-                metodoPago === "billetera"
-                    ? numeroDocumento
-                    : null,
+  const response = await fetch(
+    `${API_URL}/api/reservas/confirmar-pago`,
+    {
+      method: "POST",
 
-                telefono:
-                metodoPago === "billetera"
-                    ? telefono
-                    : null,
+      headers: {
+        "Content-Type": "application/json",
+      },
 
-                monto_total: totalGeneral,
+      body: JSON.stringify({
+        funcion_id: Number(params.funcionId ?? 0),
 
-                productos:
-                JSON.parse(params.productos ?? "[]"),
-            }),
-            }
-        );
+        asientos: listaAsientos,
 
-        const data = await response.json();
+        cantidad_entradas: cantidadEntradas,
 
-        if (!response.ok) {
-            console.log("Error del backend:", data);
+        nombre_cliente: nombre.trim(),
 
-            Alert.alert(
-            "Error",
-            data?.message ||
-                data?.error ||
-                "No se pudo procesar el pago."
-            );
+        correo_cliente: correo.trim(),
 
-            return;
-        }
+        metodo_pago: metodoPago,
 
-        // ===============================================
-        // ENVIAR VOUCHER AL CORREO
-        // ===============================================
+        billetera:
+          metodoPago === "billetera"
+            ? billetera
+            : null,
 
-        try {
-        const responseCorreo = await fetch(
-            `${API_URL}/api/reservas/${reservaId}/enviar-voucher`,
-            {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            }
-        );
+        tipo_documento:
+          metodoPago === "billetera"
+            ? tipoDocumento
+            : null,
 
-        const dataCorreo = await responseCorreo.json();
+        numero_documento:
+          metodoPago === "billetera"
+            ? numeroDocumento
+            : null,
 
-        if (!responseCorreo.ok) {
-            console.log(
-            "Error enviando voucher:",
-            dataCorreo
-            );
+        telefono:
+          metodoPago === "billetera"
+            ? telefono
+            : null,
 
-            Alert.alert(
-            "Pago realizado",
-            "El pago se registró correctamente, pero no se pudo enviar el voucher al correo."
-            );
-        } else {
-            console.log(
-            "Voucher enviado correctamente al correo"
-            );
-        }
-        } catch (errorCorreo) {
-        console.error(
-            "Error enviando voucher:",
-            errorCorreo
-        );
+        productos,
+      }),
+    }
+  );
 
-        Alert.alert(
-            "Pago realizado",
-            "El pago se registró correctamente, pero hubo un problema enviando el voucher al correo."
-        );
-        }
-        // ===============================================
-        // PAGO CORRECTO -> VOUCHER
-        // ===============================================
+  const textoRespuesta = await response.text();
 
-        router.replace({
-            pathname: "/voucher",
+console.log(
+  "STATUS CONFIRMAR PAGO:",
+  response.status
+);
 
-            params: {
-            reservaId,
+console.log(
+  "RESPUESTA CONFIRMAR PAGO:",
+  textoRespuesta
+);
 
-            cineId,
-            cine,
+let data: any;
 
-            peliculaId,
-            titulo,
-            sala,
-            horario,
-            tipoCine,
-            asientos,
+try {
+  data = JSON.parse(textoRespuesta);
+} catch {
+  console.error(
+    "La respuesta del servidor NO es JSON:",
+    textoRespuesta
+  );
 
-            cantidadEntradas:
-                cantidadEntradas.toString(),
+  Alert.alert(
+    "Error del servidor",
+    `El servidor respondió con un formato inesperado. Código: ${response.status}`
+  );
 
-            montoEntradas:
-                montoEntradas.toString(),
+  return;
+}
 
-            productos:
-                params.productos ?? "[]",
+  // =====================================================
+  // ERROR DE ASIENTO OCUPADO
+  // =====================================================
 
-            totalProductos:
-                totalProductos.toString(),
+  if (response.status === 409) {
+    Alert.alert(
+      "Asiento no disponible",
+      data?.ocupados?.length
+        ? `Los siguientes asientos ya fueron ocupados: ${data.ocupados.join(
+            ", "
+          )}`
+        : "Uno o más asientos ya fueron ocupados."
+    );
 
-            totalGeneral:
-                totalGeneral.toString(),
+    return;
+  }
 
-            nombre: nombre.trim(),
+  // =====================================================
+  // OTROS ERRORES
+  // =====================================================
 
-            correo: correo.trim(),
+  if (!response.ok) {
+    console.error(
+      "Error confirmando pago:",
+      data
+    );
 
-            metodoPago,
+    Alert.alert(
+      "Error",
+      data?.error ||
+        data?.message ||
+        "No se pudo completar la compra."
+    );
 
-            billetera:
-                metodoPago === "billetera"
-                ? billetera
-                : "",
-            },
-        });
-        } catch (error) {
-        console.error(
-            "Error procesando pago:",
-            error
-        );
+    return;
+  }
 
-        Alert.alert(
-            "Error de conexión",
-            "No se pudo conectar con el servidor."
-        );
-        } finally {
-        setProcesando(false);
-        }
+  // =====================================================
+  // RESERVA CREADA
+  // =====================================================
+
+  const reservaId =
+    data.reservaId ??
+    data.id ??
+    data.reserva?.id;
+
+  if (!reservaId) {
+    console.error(
+      "El backend no devolvió reservaId:",
+      data
+    );
+
+    Alert.alert(
+      "Error",
+      "La compra fue procesada, pero no se recibió el identificador de la reserva."
+    );
+
+    return;
+  }
+
+  console.log(
+    "✅ Reserva creada:",
+    reservaId
+  );
+
+  // =====================================================
+  // ENVIAR VOUCHER AL CORREO
+  // =====================================================
+
+  try {
+    const responseCorreo = await fetch(
+      `${API_URL}/api/reservas/${reservaId}/enviar-voucher`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const dataCorreo =
+      await responseCorreo.json();
+
+    if (!responseCorreo.ok) {
+      console.log(
+        "Error enviando voucher:",
+        dataCorreo
+      );
+
+      Alert.alert(
+        "Compra realizada",
+        "La compra se registró correctamente, pero no se pudo enviar el voucher al correo."
+      );
+    } else {
+      console.log(
+        "✅ Voucher enviado correctamente"
+      );
+    }
+  } catch (errorCorreo) {
+    console.error(
+      "Error enviando voucher:",
+      errorCorreo
+    );
+
+    Alert.alert(
+      "Compra realizada",
+      "La compra se registró correctamente, pero hubo un problema enviando el voucher."
+    );
+  }
+
+  // =====================================================
+  // IR AL VOUCHER
+  // =====================================================
+
+  router.replace({
+    pathname: "/voucher",
+
+    params: {
+      reservaId: reservaId.toString(),
+
+      cineId,
+      cine,
+
+      peliculaId,
+      titulo,
+      sala,
+      horario,
+      tipoCine,
+      asientos,
+
+      cantidadEntradas:
+        cantidadEntradas.toString(),
+
+      montoEntradas:
+        montoEntradas.toString(),
+
+      productos:
+        params.productos ?? "[]",
+
+      totalProductos:
+        totalProductos.toString(),
+
+      totalGeneral:
+        totalGeneral.toString(),
+
+      nombre:
+        nombre.trim(),
+
+      correo:
+        correo.trim(),
+
+      metodoPago,
+
+      billetera:
+        metodoPago === "billetera"
+          ? billetera
+          : "",
+    },
+  });
+
+} catch (error) {
+  console.error(
+    "Error procesando compra:",
+    error
+  );
+
+  Alert.alert(
+    "Error de conexión",
+    "No se pudo conectar con el servidor."
+  );
+} finally {
+  setProcesando(false);
+}
   };
 
   return (

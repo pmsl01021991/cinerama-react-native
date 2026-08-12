@@ -39,24 +39,17 @@ type Funcion = {
 export default function Info() {
   const params = useLocalSearchParams<{
     pelicula?: string;
-    reservaId?: string;
     cineId?: string;
     cine?: string;
     }>();
 
     const peliculaId = Number(params.pelicula);
-
-    const reservaId = params.reservaId ?? "";
     const cineId = params.cineId ?? "";
     const cine = params.cine ?? "";
 
   const [modalVisible, setModalVisible] = useState(false);
   const [funciones, setFunciones] = useState<Funcion[]>([]);
   const [cargandoFunciones, setCargandoFunciones] = useState(true);
-
-  // =====================================================
-  // PELÍCULAS ACTUALES
-  // =====================================================
 
   const peliculas: PeliculaInfo[] = [
     {
@@ -140,10 +133,6 @@ export default function Info() {
     },
   ];
 
-  // =====================================================
-  // BUSCAR PELÍCULA
-  // =====================================================
-
   const pelicula = peliculas.find((p) => p.id === peliculaId);
     const player = useVideoPlayer(
       pelicula?.trailer ?? null,
@@ -204,10 +193,6 @@ export default function Info() {
       cargarFunciones();
     }, [cine, pelicula?.codigo]);
 
-  // =====================================================
-  // PELÍCULA NO ENCONTRADA
-  // =====================================================
-
   if (!pelicula) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-gray-100 px-6">
@@ -232,95 +217,26 @@ export default function Info() {
       </SafeAreaView>
     );
   }
-    // =====================================================
-// SELECCIONAR FUNCIÓN
-// =====================================================
 
-const seleccionarFuncion = async (funcion: Funcion) => {
-  if (!reservaId) {
-    Alert.alert(
-      "Error",
-      "No se encontró el identificador de la reserva."
-    );
-    return;
-  }
+const seleccionarFuncion = (funcion: Funcion) => {
+  router.push({
+    pathname: "/asientos",
 
-  try {
-    // ==========================================
-    // ACTUALIZAR RESERVA EN MYSQL
-    // ==========================================
+    params: {
+      cineId,
+      cine,
 
-    const response = await fetch(
-      `${API_URL}/api/reservas/${reservaId}`,
-      {
-        method: "PUT",
+      peliculaId: pelicula.id.toString(),
+      peliculaCodigo: pelicula.codigo,
+      titulo: pelicula.titulo,
 
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          funcion_id: funcion.id,
-          pelicula_codigo: pelicula.codigo,
-          pelicula_titulo: pelicula.titulo,
-          tipo_cine: funcion.tipo_cine,
-          sala: funcion.sala,
-          horario: funcion.hora,
-          estado: "RESERVADO",
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const texto = await response.text();
-
-      console.log(
-        "Error actualizando reserva:",
-        texto
-      );
-
-      Alert.alert(
-        "Error",
-        "No se pudo guardar la función seleccionada."
-      );
-
-      return;
-    }
-
-    // ==========================================
-    // IR A ASIENTOS
-    // ==========================================
-
-    router.push({
-      pathname: "/asientos",
-
-      params: {
-        reservaId,
-        cineId,
-        cine,
-
-        peliculaId: pelicula.id.toString(),
-        peliculaCodigo: pelicula.codigo,
-        titulo: pelicula.titulo,
-
-        funcionId: funcion.id.toString(),
-        sala: funcion.sala,
-        horario: funcion.hora,
-        tipoCine: funcion.tipo_cine,
-        precio: funcion.precio,
-      },
-    });
-  } catch (error) {
-    console.error(
-      "Error seleccionando función:",
-      error
-    );
-
-    Alert.alert(
-      "Error de conexión",
-      "No se pudo conectar con el servidor."
-    );
-  }
+      funcionId: funcion.id.toString(),
+      sala: funcion.sala,
+      horario: funcion.hora,
+      tipoCine: funcion.tipo_cine,
+      precio: funcion.precio,
+    },
+  });
 };
 
   return (
@@ -684,10 +600,6 @@ const seleccionarFuncion = async (funcion: Funcion) => {
     </SafeAreaView>
   );
 }
-
-// =========================================================
-// COMPONENTE FILA DE INFORMACIÓN
-// =========================================================
 
 type InfoRowProps = {
   icon: keyof typeof Ionicons.glyphMap;
