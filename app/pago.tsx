@@ -258,11 +258,6 @@ try {
     return;
   }
 
-  // =====================================================
-  // CONFIRMAR PAGO
-  // CREA LA RESERVA RECIÉN AQUÍ
-  // =====================================================
-
   const response = await fetch(
     `${API_URL}/api/reservas/confirmar-pago`,
     {
